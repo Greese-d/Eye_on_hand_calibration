@@ -3,7 +3,7 @@ clc;
 close all;
 rosshutdown;
 %% Start Dobot Magician Node
-rosinit;
+rosinit("192.168.27.1");
 
 %% Start Dobot ROS
 dobot = DobotMagician();
