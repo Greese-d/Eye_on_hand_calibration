@@ -5,7 +5,7 @@ close all;
 rosshutdown;
 pause(1)
 rosinit('192.168.27.1')
-dobot = DobotMagician2();
+dobot = DobotMagician();
 camera = webcam("HP 320 FHD Webcam");
 calibration = EyeOnHandCalibration(dobot, camera);
 
@@ -14,9 +14,6 @@ qs_calib = [];
 
 %% Get current qvalues
 q = dobot.GetCurrentJointState
-
-%% Get current end-effector pose
-T = dobot.PublishEndEffectorPose
 
 %% Move to targer Q's
 
@@ -61,11 +58,8 @@ qs_calib(end+1, :) = q_mem
 
 camera = webcam("HP 320 FHD Webcam");
 
-%% Move through qs
-for i = 1:1:15
-    calibration.moveToTargetQs(rad2deg(calibration.qs_calib(i, :)))
-    pause(2)
-end
+%%Move through qs
+for i = 
 
 
 %% save waypoint

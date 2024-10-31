@@ -3,18 +3,20 @@ clc;
 close all;
 rosshutdown;
 %% Start Dobot Magician Node
-rosinit;
+rosinit('192.168.27.1');
 
 %% Start Dobot ROS
 dobot = DobotMagician();
 
 %% Test Motion
 %% Publish custom joint target
-joint_target = [0.0,0.4,0.3,0.0];
+target_deg = [0 20 -10 0];
+joint_target = deg2rad(target_deg);
+%joint_target = [0.1,0.3,0.2,0.2];
 dobot.PublishTargetJoint(joint_target);
 
 %% Publish custom end effector pose
-end_effector_position = [0.2,0,0.05];
+end_effector_position = [0.1,0,0.05];
 end_effector_rotation = [0,0,0];
 dobot.PublishEndEffectorPose(end_effector_position,end_effector_rotation);
 
