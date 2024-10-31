@@ -1,4 +1,4 @@
-classdef DobotMagician2 < handle
+classdef DobotMagician < handle
 
    properties(Access = private)
         % Subscribers
@@ -38,7 +38,7 @@ classdef DobotMagician2 < handle
    end
    
    methods(Access = public)
-       function self = DobotMagician2()
+       function self = DobotMagician()
            % Initialise subs and pubs as object starts
            self.jointStateSub = rossubscriber('/dobot_magician/joint_states');
            self.endEffectorStateSub = rossubscriber('/dobot_magician/end_effector_poses');

@@ -27,7 +27,7 @@ classdef EyeOnHandCalibration
 
         function takePicture(obj)
             % Directory to save images
-            outputFolder = 'eyeonhandcalib_images';
+            outputFolder = 'eyeonhandcalib_images2';
 
             if ~exist(outputFolder, 'dir')
                 mkdir(outputFolder);  % Create directory if it doesn't exist

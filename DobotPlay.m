@@ -5,9 +5,9 @@ close all;
 rosshutdown;
 pause(1)
 rosinit('192.168.27.1')
-dobot = DobotMagician2();
-camera = webcam("HP 320 FHD Webcam");
-calibration = EyeOnHandCalibration(dobot, camera);
+dobot = DobotMagician();
+%camera = webcam("HP 320 FHD Webcam");
+%calibration = EyeOnHandCalibration(dobot, camera);
 
 %% Initiate calibratio position array
 qs_calib = [];

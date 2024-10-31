@@ -1,6 +1,6 @@
-function intrinsics = getIntrinsics()
+function intrinsics = getIntrinsics(foldername)
     % Path to your images
-    imageFolder = fullfile("photos2"); % Adjust the path if "photos" is not in the current directory
+    imageFolder = fullfile(foldername); % Adjust the path if "photos" is not in the current directory
 
     % Load images from the folder
     images = imageDatastore(imageFolder);
