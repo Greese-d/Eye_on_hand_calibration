@@ -6,22 +6,23 @@ rosshutdown;
 pause(1)
 rosinit('192.168.27.1')
 dobot = DobotMagician();
-%camera = webcam("HP 320 FHD Webcam");
-%calibration = EyeOnHandCalibration(dobot, camera);
+camera = webcam("HP 320 FHD Webcam");
+calibration = EyeOnHandCalibration(dobot, camera);
 
 %% Initiate calibratio position array
 qs_calib = [];
 
 %% Get current qvalues
-q = dobot.GetCurrentJointState
+dobot.GetCurrentJointState
 
 %% Get current end-effector pose
 T = dobot.PublishEndEffectorPose
 
 %% Move to targer Q's
 
-target_deg = [0 20 -10 0];
-joint_target = deg2rad(target_deg);
+%target_deg = [0 20 -10 0];
+%joint_target = deg2rad(target_deg);
+joint_target = [-0.0605    0.1299    0.3203         0]
 dobot.PublishTargetJoint(joint_target);
 
 %% Move to memory Q's
@@ -70,7 +71,12 @@ end
 
 %% save waypoint
 %saveWaypoint();
-calibration = calibration.saveWaypoint;
+for i = 1:1:10
+    pause()
+    calibration = calibration.saveWaypoint('calib2');
+    disp("Taken a picture No" + i)
+end
+disp("finished taking pictures")
 
 %% Helper functions
 

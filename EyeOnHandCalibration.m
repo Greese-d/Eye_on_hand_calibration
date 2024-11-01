@@ -25,9 +25,9 @@ classdef EyeOnHandCalibration
             %obj.qs_calib = [obj.qs_calib; q_mem];  % Append to qs_calib without overwriting
         end
 
-        function takePicture(obj)
+        function takePicture(obj, foldername)
             % Directory to save images
-            outputFolder = 'eyeonhandcalib_images2';
+            outputFolder = foldername;
 
             if ~exist(outputFolder, 'dir')
                 mkdir(outputFolder);  % Create directory if it doesn't exist
@@ -48,9 +48,9 @@ classdef EyeOnHandCalibration
             imwrite(img, filename);
         end
 
-        function obj = saveWaypoint(obj)
+        function obj = saveWaypoint(obj, foldername)
             obj = obj.memoriseQs();       % Memorize the current joint state
-            obj.takePicture();             % Take and save the picture
+            obj.takePicture(foldername);             % Take and save the picture
         end
 
     end

@@ -1,12 +1,12 @@
 % Load the images
-images = imageDatastore("photos");
+images = imageDatastore("calib2");
 
 % Detect the checkerboard corners in the images
 [imagePoints, boardSize] = detectCheckerboardPoints(images.Files);
 
 % Generate the world coordinates of the checkerboard corners
 % with the upper-left corner at (0,0)
-squareSize = 29; % in mm
+squareSize = 12; % in mm
 %boardSize= [5 6];
 worldPoints = generateCheckerboardPoints(boardSize,squareSize);
 
@@ -17,13 +17,19 @@ cameraParams = estimateCameraParameters(imagePoints, worldPoints, ...
     ImageSize=imageSize);
 intrinsics = cameraParams.Intrinsics;
 
+figure;
+hold on;
+axis equal;
+
+imagesRobot = imageDatastore("calib1");
+for i=1:1:14
 % Load an image at a new location
-imOrig = readimage(images, 9); 
+imOrig = readimage(imagesRobot, i); 
 
 % Display the input image
-figure;
-imshow(imOrig);
-title("Input Image");
+%figure;
+%imshow(imOrig);
+%title("Input Image");
 
 % Undistort the image
 [im, newIntrinsics] = undistortImage(imOrig, intrinsics, OutputView="full");
@@ -36,15 +42,17 @@ newOrigin = intrinsics.PrincipalPoint - newIntrinsics.PrincipalPoint;
 imagePoints = imagePoints + newOrigin;
 
 % Calculate new extrinsics
+disp("Estimating extrinsics for picture No" + i)
 camExtrinsics = estimateExtrinsics(imagePoints, worldPoints, newIntrinsics);
 
 % Calculate the camera pose
 camPose = extr2pose(camExtrinsics);
 
 % Visualize the camera pose and world points
-figure;
-plotCamera(AbsolutePose=camPose, Size=20);
-hold on;
+plotCamera(AbsolutePose=camPose, Size=5);
+%hold on;
 pcshow([worldPoints, zeros(size(worldPoints, 1), 1)], ...
-    VerticalAxisDir="down", MarkerSize=40);
-hold off;
+    VerticalAxisDir="down", MarkerSize=10);
+%hold off;
+
+end
