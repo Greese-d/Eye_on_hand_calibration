@@ -19,9 +19,30 @@ tr = dobot.getCurrentEndEffectorPose
 
 %target_deg = [0 20 -10 0];
 %joint_target = deg2rad(target_deg);
-joint_target = [-0.0605    0.1299    0.3203         0];
-dobot.PublishTargetJoint(joint_target);
+%joint_target = [-0.0605    0.1299    0.3203         0];
+% join_target = calibration.qs_calib(10, :);
+% dobot.PublishTargetJoint(joint_target);
+calibration.moveToTargetQs(rad2deg(calibration.qs_calib(3, :)))
 
+%% Specify target location relative to end effector
+% translation = [0 0 -0.01];
+% rotation = eye(3, 3);
+target = transl(0, 0.02, 0);
+lastlocation = dobot.getCurrentEndEffectorPose
+newlocation = lastlocation * target
+
+%% Move to target location
+rotationMatrix = newlocation(1:3, 1:3)
+translationVector = newlocation(1:3, 4)'
+dobot.PublishEndEffectorPose(translationVector, rotationMatrix);
+
+%% Specify target in camera's coordinate system
+target = transl(0, 0, 0.02);
+lastlocation = dobot.getCurrentEndEffectorPose
+newlocation = lastlocation * cameraToEndEffectorTform.A * target
+
+%% 
+cameraToEndEffectorTform.Translation = cameraToEndEffectorTform.Translation * 0.1
 %% Turn on gripper
 onOff = 1;
 openClose = 1;
@@ -63,29 +84,29 @@ disp("finished taking pictures")
 
 
 %% Load q values:
-calibration.qs_calib = [-0.0675    0.4489    0.1725         0
-   -0.0675    0.4489    0.1725         0
-    0.0444    0.3180    0.2223         0
-    0.0522    0.6266    0.2601         0
-   -0.0305    0.6273    0.2761         0
-   -0.0106    0.6278    0.0602         0
-   -0.0176    0.4083    0.0823         0
-   -0.0799    0.4210    0.0972         0
-   -0.0808    0.6246    0.1211         0
-    0.0582    0.4882    0.1340         0
-   -0.0434    0.6131    0.1847         0
-    0.0102    0.5259    0.0859         0
-    0.1830    0.5283    0.0247         0
-    0.2194    0.5243   -0.0824         0
-    0.2583    0.5252   -0.0805         0
-];
+calibration.qs_calib = [
+
+   -0.0605    0.1299    0.3203         0
+    0.0282    0.1283    0.2466         0
+    0.0032    0.3936    0.2448         0
+   -0.1363    0.3823    0.1944         0
+   -0.2758    0.1524    0.1019         0
+   -0.1372    0.0365    0.1424         0
+    0.0397    0.0347    0.1563         0
+    0.0785    0.1764    0.1802         0
+    0.0402    0.3697    0.2318         0
+   -0.0092    0.4222    0.1827         0
+   -0.0037    0.4203   -0.1533         0
+   -0.0693    0.3420    0.5162         0
+    0.0046    0.3434    0.5191         0
+   -0.1866    0.3845    0.4712         0];
 
 %% Getting data for computation
-cameraToBoardTform = Extrinsics();
+boardToCameraTform = Extrinsics();
 endEffectorToBaseTform = Kinematics(dobot, calibration.qs_calib);
 
 %% Camera to end-effector transform
-cameraToEndEffectorTform = helperEstimateHandEyeTransform(cameraToBoardTform, endEffectorToBaseTform, "eye-in-hand")
+cameraToEndEffectorTform = helperEstimateHandEyeTransform(boardToCameraTform, endEffectorToBaseTform, "eye-in-hand")
 
 %% Tesing calibration
 testImage = imread("textobj/image_01.jpg");

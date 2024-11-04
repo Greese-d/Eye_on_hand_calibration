@@ -1,4 +1,4 @@
-function [cameraToBoardTform] = Extrinsics()
+function [boardToCameraTform] = Extrinsics()
 
 disp("Getting intrinsics")
 % Load the images
@@ -9,7 +9,7 @@ images = imageDatastore("calib2");
 
 % Generate the world coordinates of the checkerboard corners
 % with the upper-left corner at (0,0)
-squareSize = 12; % in mm
+squareSize = 0.012; % in m
 %boardSize= [5 6];
 worldPoints = generateCheckerboardPoints(boardSize,squareSize);
 
@@ -26,9 +26,9 @@ hold on;
 axis equal;
 
 
-imagesRobot = imageDatastore("calib4");
+imagesRobot = imageDatastore("calib1");
 noOfPics = numel(imagesRobot.Files);
-cameraToBoardTform = rigidtform3d.empty(noOfPics, 0);
+boardToCameraTform = rigidtform3d.empty(noOfPics, 0);
 for i=1:1:noOfPics
     % Load an image at a new location
     imOrig = readimage(imagesRobot, i);
@@ -55,7 +55,7 @@ for i=1:1:noOfPics
     % Calculate the camera pose
     camPose = extr2pose(camExtrinsics);
   
-    cameraToBoardTform(i) = camPose;
+    boardToCameraTform(i) = camExtrinsics;
 
     % Visualize the camera pose and world points
     plotCamera(AbsolutePose=camPose, Size=5);

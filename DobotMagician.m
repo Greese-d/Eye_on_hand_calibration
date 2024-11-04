@@ -85,6 +85,13 @@ classdef DobotMagician < handle
            
            send(self.targetEndEffectorPub,self.targetEndEffectorMsg);
        end
+
+       function PublishEndEffectorLocation(self,translation)
+           self.targetEndEffectorMsg.Position.X = translation(1);
+           self.targetEndEffectorMsg.Position.Y = translation(2);
+           self.targetEndEffectorMsg.Position.Z = translation(3);
+           send(self.targetEndEffectorPub,self.targetEndEffectorMsg);
+       end
        
        function PublishToolState(self,onOff,openClose)
            self.toolStateMsg.Data = [onOff,openClose];
