@@ -105,6 +105,23 @@ classdef DobotMagician < handle
             latestJointStateMsg = self.jointStateSub.LatestMessage;
             jointStates = latestJointStateMsg.Position;
        end
+
+       function tr = getCurrentEndEffectorPose(self)
+           %endEffectorPoseSubscriber = self.endEffectorStateSub;
+           currentEndEffectorPoseMsg = self.endEffectorStateSub.LatestMessage;
+           % Extract the position of the end effector from the received message
+           currentEndEffectorPosition = [currentEndEffectorPoseMsg.Pose.Position.X,
+               currentEndEffectorPoseMsg.Pose.Position.Y,
+               currentEndEffectorPoseMsg.Pose.Position.Z]';
+           % Extract the orientation of the end effector
+           currentEndEffectorQuat = [currentEndEffectorPoseMsg.Pose.Orientation.W,
+               currentEndEffectorPoseMsg.Pose.Orientation.X,
+               currentEndEffectorPoseMsg.Pose.Orientation.Y,
+               currentEndEffectorPoseMsg.Pose.Orientation.Z]';
+           % Convert from quaternion to euler
+           rotation = quat2eul(currentEndEffectorQuat);
+           tr=transl(currentEndEffectorPosition)*trotx(rotation(1));
+       end
        
        function SetRobotOnRail(self,status)
            self.railStatusMsg.Data = status;

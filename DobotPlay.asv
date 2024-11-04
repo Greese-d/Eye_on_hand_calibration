@@ -6,31 +6,21 @@ rosshutdown;
 pause(1)
 rosinit('192.168.27.1')
 dobot = DobotMagician();
-%camera = webcam("HP 320 FHD Webcam");
-%calibration = EyeOnHandCalibration(dobot, camera);
-
-%% Initiate calibratio position array
-qs_calib = [];
+camera = webcam("HP 320 FHD Webcam");
+calibration = EyeOnHandCalibration(dobot, camera);
 
 %% Get current qvalues
 dobot.GetCurrentJointState
 
 %% Get current end-effector pose
-T = dobot.PublishEndEffectorPose
+tr = dobot.getCurrentEndEffectorPose
 
 %% Move to targer Q's
 
-target_deg = [0 20 -10 0];
-joint_target = deg2rad(target_deg);
+%target_deg = [0 20 -10 0];
+%joint_target = deg2rad(target_deg);
+joint_target = [-0.0605    0.1299    0.3203         0];
 dobot.PublishTargetJoint(joint_target);
-
-%% Move to memory Q's
-
-joint_target = q_mem;
-dobot.PublishTargetJoint(joint_target);
-
-%% Memorise Q's
-q_mem = dobot.GetCurrentJointState;
 
 %% Turn on gripper
 onOff = 1;
@@ -52,26 +42,73 @@ onOff = 0;
 openClose = 0;
 dobot.PublishToolState(onOff,openClose);
 
-%% Add qs to calibration qs array
-
-q_mem = dobot.GetCurrentJointState;
-qs_calib(end+1, :) = q_mem
-
-%% Set up camera
-
-camera = webcam("HP 320 FHD Webcam");
-
 %% Move through qs
-for i = 1:1:15
+for i = 1:1:size(calibration.qs_calib, 1)
     calibration.moveToTargetQs(rad2deg(calibration.qs_calib(i, :)))
     pause(2)
 end
 
 
-%% save waypoint
-%saveWaypoint();
-for i = 1:1:1
-calibration = calibration.saveWaypoint;
+%% save waypoints
+
+% Specify number of pictures
+num_of_pic = 15;
+
+for i = 1:1:num_of_pic
+    pause()
+    calibration = calibration.saveWaypoint('calib3');
+    disp("Taken a picture No" + i)
+end
+disp("finished taking pictures")
+
+
+%% Load q values:
+calibration.qs_calib = [0.1538    0.1246    0.4702         0
+    0.1529    0.1179   -0.0856         0
+   -0.0346    0.1247   -0.0718         0
+    0.3909    0.0724   -0.0580         0
+    0.3160    0.0972    0.2317         0
+    0.1788    0.1619    0.3217         0
+    0.1672    0.1377    0.7273         0
+    0.1756    0.2603   -0.2018         0
+    0.4417    0.0638   -0.1365         0
+   -0.0721    0.1580   -0.2102         0
+    0.0171   -0.0322    0.2345         0
+    0.4537   -0.0299   -0.0224         0
+    0.1793   -0.0256    0.2034         0
+    0.0092   -0.0210    0.2039         0
+    0.3313   -0.0049    0.2654         0];
+
+%% Getting data for computation
+cameraToBoardTform = Extrinsics();
+endEffectorToBaseTform = Kinematics(dobot, calibration.qs_calib);
+
+%% Camera to end-effector transform
+cameraToEndEffectorTform = helperEstimateHandEyeTransform(cameraToBoardTform, endEffectorToBaseTform, "eye-in-hand")
+
+%% Tesing calibration
+testImage = imread("textobj/image_01.jpg");
+intrinsics = getIntrinsics;
+undistortedTestImage = undistortImage(testImage, intrinsics);
+
+% Specify the tag family and tag size of the AprilTag.
+tagFamily = 'tag36h11';
+tagSize = 0.019; % AprilTag size in meters
+
+% Detect AprilTag in test image.
+[~,~,aprilTagToCameraTform] = readAprilTag(undistortedTestImage,tagFamily,intrinsics,tagSize);
+%% Moving to april tag
+
+% Find the transformation from the robot base to the April Tag.
+tagToEndEffectorTestTform = cameraToEndEffectorTform.A * aprilTagToCameraTform.A;
+cubePosition = tagToEndEffectorTestTform(1:3,4)
+grabbingSpotToEndEffectorTr = transl(0,0, 0.095) * tagToEndEffectorTestTform;
+
+rotationMatrix = grabbingSpotToEndEffectorTr(1:3, 1:3);
+translationVector = grabbingSpotToEndEffectorTr(1:3, 4)';
+disp(grabbingSpotToEndEffectorTr)
+
+dobot.PublishEndEffectorPose(translationVector, rotationMatrix)
 
 %% Helper functions
 
