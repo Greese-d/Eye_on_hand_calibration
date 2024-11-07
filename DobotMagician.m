@@ -126,8 +126,9 @@ classdef DobotMagician < handle
                currentEndEffectorPoseMsg.Pose.Orientation.Y,
                currentEndEffectorPoseMsg.Pose.Orientation.Z]';
            % Convert from quaternion to euler
-           rotation = quat2eul(currentEndEffectorQuat);
-           tr=transl(currentEndEffectorPosition)*trotx(rotation(1));
+           rotation = quat2eul(currentEndEffectorQuat, "XYZ");
+           tr = rigidtform3d(rotation, currentEndEffectorPosition);
+           %tr=transl(currentEndEffectorPosition)*trotx(rotation(1));
        end
        
        function SetRobotOnRail(self,status)

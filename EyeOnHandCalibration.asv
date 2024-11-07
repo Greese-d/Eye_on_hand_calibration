@@ -16,8 +16,10 @@ classdef EyeOnHandCalibration
             obj.qs_calib = [];
         end
 
-        function moveToTargetQs(obj, targetQ)
-            obj.dobot.PublishTargetJoint(targetQ);
+        function moveToTargetQs(obj, targetQDeg)
+            target_deg = targetQDeg;
+            joint_target = deg2rad(target_deg);
+            obj.dobot.PublishTargetJoint(joint_target);
         end
 
         function obj = memoriseQs(obj)
@@ -56,12 +58,13 @@ classdef EyeOnHandCalibration
 
 
         function obj = getData(obj, noOfPoses, outputFolder)
+
             for i = 1:1:noOfPoses
                 pause()
                 obj = obj.saveWaypoint(outputFolder);
-                disp("Saved a waypoint No" + i)
+                disp("Taken a picture No" + i)
             end
-            disp("Finished getting waypoints")
+            disp("finished taking pictures")
         end
 
 
@@ -122,12 +125,7 @@ classdef EyeOnHandCalibration
         end
 
         function moveThroughQs(obj)
-            for i = 1:1:size(obj.qs_calib, 1)
-                obj.moveToTargetQs(obj.qs_calib(i, :))
-                pause(2)
-            end
-        end
-
+            en
 
     end
 end

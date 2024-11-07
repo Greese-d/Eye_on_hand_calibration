@@ -93,6 +93,12 @@ function cameraToEndEffectorTform = helperEstimateHandEyeTransform(boardToCamera
 
 % Compute translation using least squares.
     [TranslationEndEffectorToCamera,~] = lsqr(A,b);
+    
+    % % Correct x and y
+    % temp = TranslationEndEffectorToCamera(1);
+    % TranslationEndEffectorToCamera(1) = -1 * TranslationEndEffectorToCamera(2);
+    % TranslationEndEffectorToCamera(2) = temp;
+
     TEndEffectorToCamera = trvec2tform(TranslationEndEffectorToCamera')*rotm2tform(REndEffectorToCamera);
     cameraToEndEffectorTform = rigidtform3d(TEndEffectorToCamera);
 end
