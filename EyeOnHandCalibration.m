@@ -75,13 +75,14 @@ classdef EyeOnHandCalibration
         end
 
 
-        function obj = computeExtrinsics(obj, inputFolder)
-            obj.boardToCameraTform = getExtrinsics(inputFolder);
+        function obj = computeExtrinsics(obj, intrinsicsFolder, inputFolder)
+            obj.boardToCameraTform = getExtrinsics(intrinsicsFolder, inputFolder);
         end
 
 
         function obj = computeKinematics(obj)
             obj.endEffectorToBaseTform = getKinematics(obj.dobot, obj.qs_calib);
+            plotEndEff;
         end
 
 

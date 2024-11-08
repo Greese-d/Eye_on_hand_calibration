@@ -1,8 +1,8 @@
-function [boardToCameraTform] = getExtrinsics(foldername)
+function [boardToCameraTform] = getExtrinsics(intrinsicsFolder, foldername)
 
 disp("Getting intrinsics")
 % Load the images
-images = imageDatastore("cameraCalib");
+images = imageDatastore(intrinsicsFolder);
 
 % Detect the checkerboard corners in the images
 [imagePoints, boardSize] = detectCheckerboardPoints(images.Files);

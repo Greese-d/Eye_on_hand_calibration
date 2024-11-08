@@ -6,12 +6,19 @@ rosshutdown;
 pause(1)
 rosinit('192.168.27.1')
 dobot = DobotMagician();
-camera = webcam("HP 320 FHD Webcam");
+camera = webcam("HP 320 FHD Webcam");  % specify camera's name used for calibration
 calibration = EyeOnHandCalibration(dobot, camera);
 run('rvctools/startup_rvc.m')
 
+
+%% Get images for intrinsics
+noOfPics = 15;      % Specify amount of pictures for intrinsics analysis(10-20)
+for i = 1:1:noOfPics
+    calibration.takePicture('picsIntrinsics')
+    pause()
+end
 %% Get calibration data
-calibration.getData(15, 'calib5')   % Specify number of pictures
+calibration.getData(15, 'calib5')   % Specify number of pictures (15-30) and folder name for them
 
 %% Load q values:
 % If skipped last step
@@ -52,7 +59,8 @@ calibration = calibration.loadQs(new_q);
 
 %% Computation
 
-calibration = calibration.computeExtrinsics('robotCalib');
+calibration = calibration.computeExtrinsics('cameraCalib', 'robotCalib'); % Specify folder with pictures for intrinsics 
+% and extrinsics correspondingly
 calibration = calibration.computeKinematics;
 calibration = calibration.computeFinalTform;
 
@@ -67,19 +75,19 @@ calibration.cameraToEndEffectorTform = rigidtform3d(newTr);
 
 
 %% Specify target location relative to end effector
-target = transl(0, -0.02, 0);
+target = transl(0, -0.02, 0); % XYZ of desired location relative to end-effector 
 lastlocation = dobot.getCurrentEndEffectorPose
 newlocation = lastlocation.A * target
 
 %% Specify target in camera's coordinate system
-target = transl(0, 0, 0.02);
+target = transl(0, 0, 0.02); % XYZ of desired location relative to camera 
 lastlocation = dobot.getCurrentEndEffectorPose
 newlocation = lastlocation.A * calibration.cameraToEndEffectorTform.A * target * inv(calibration.cameraToEndEffectorTform.A)
 %newlocation = lastlocation.A * transl(calibration.cameraToEndEffectorTform.Translation)
 
 
 %% Tesing calibration
-testImage = imread("object_test/image_10.jpg");
+testImage = imread("object_test/image_10.jpg"); % Specify image with AprilTag
 intrinsics = getIntrinsics;
 undistortedTestImage = undistortImage(testImage, intrinsics);
 
@@ -101,6 +109,7 @@ targetPosition = tagToBaseTr(1:3,4)'
 
 
 %% Move to target location
+% Helper function to make robot move to new location
 rotationMatrix = newlocation(1:3, 1:3)
 translationVector = newlocation(1:3, 4)'
 dobot.PublishEndEffectorPose(translationVector, rotationMatrix);

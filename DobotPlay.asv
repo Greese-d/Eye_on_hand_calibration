@@ -6,12 +6,19 @@ rosshutdown;
 pause(1)
 rosinit('192.168.27.1')
 dobot = DobotMagician();
-camera = webcam("HP 320 FHD Webcam");
+camera = webcam("HP 320 FHD Webcam");  % specify camera's name used for calibration
 calibration = EyeOnHandCalibration(dobot, camera);
 run('rvctools/startup_rvc.m')
 
+
+%% Get images for intrinsics
+noOfPics = 15;      %Specify amoutn of
+for i = 1:1:noOfPics
+    calibration.takePicture('picsIntrinsics')
+    pause()
+end
 %% Get calibration data
-calibration.getData(30, 'calib5')   % Specify number of pictures
+calibration.getData(15, 'calib5')   % Specify number of pictures and folder name for them
 
 %% Load q values:
 % If skipped last step
@@ -74,14 +81,9 @@ newlocation = lastlocation.A * target
 %% Specify target in camera's coordinate system
 target = transl(0, 0, 0.02);
 lastlocation = dobot.getCurrentEndEffectorPose
-newlocation = lastlocation * cameraToEndEffectorTform.A * target
+newlocation = lastlocation.A * calibration.cameraToEndEffectorTform.A * target * inv(calibration.cameraToEndEffectorTform.A)
 %newlocation = lastlocation.A * transl(calibration.cameraToEndEffectorTform.Translation)
 
-
-%% Move to target location
-rotationMatrix = newlocation(1:3, 1:3)
-translationVector = newlocation(1:3, 4)'
-dobot.PublishEndEffectorPose(translationVector, rotationMatrix);
 
 %% Tesing calibration
 testImage = imread("object_test/image_10.jpg");
@@ -101,11 +103,11 @@ cameraToBaseTr = lastlocation.A * calibration.cameraToEndEffectorTform.A;
 
 
 % Find the transformation from the robot base to the April Tag.
-tagToBaseTr = cameraToBaseTr * aprilTagToCameraTform.A;
+newlocation = cameraToBaseTr * aprilTagToCameraTform.A;
 targetPosition = tagToBaseTr(1:3,4)'
 
-rotationMatrix = tagToBaseTr(1:3, 1:3);
-translationVector = targetPosition;
 
-%% Move to desired location
-dobot.PublishEndEffectorPose(translationVector, [0 0 0])
+%% Move to target location
+rotationMatrix = newlocation(1:3, 1:3)
+translationVector = newlocation(1:3, 4)'
+dobot.PublishEndEffectorPose(translationVector, rotationMatrix);

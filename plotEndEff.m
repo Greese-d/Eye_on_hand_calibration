@@ -7,10 +7,10 @@ view(50, 20)
 for i=1:1:size(calibration.endEffectorToBaseTform, 2)
     trplot(eye(4),'color', 'm')
     transform = calibration.endEffectorToBaseTform(i);
-    trplot(calibration.endEffectorToBaseTform(i).A)
+    %trplot(calibration.endEffectorToBaseTform(i).A)
     %calibration.boardToCameraTform(i)
     %trplot(inv(calibration.boardToCameraTform(i).A))
     %trplot(calibration.boardToCameraTform(i).A)
-    trplot(calibration.endEffectorToBaseTform(i).A * calibration.cameraToEndEffectorTform.A, 'color', 'g')
-    %plotCamera(AbsolutePose=transform, Size=0.005);
+    %trplot(calibration.endEffectorToBaseTform(i).A * calibration.cameraToEndEffectorTform.A, 'color', 'g')
+    plotCamera(AbsolutePose=transform, Size=0.005);
 end
