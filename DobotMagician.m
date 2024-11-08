@@ -32,6 +32,7 @@ classdef DobotMagician < handle
         
        eMotorPub;
        eMotorMsg;
+       toolOffset = 0.092; % length of tool in m
    end
    
    properties(Access = private)
@@ -75,7 +76,7 @@ classdef DobotMagician < handle
        function PublishEndEffectorPose(self,pose,rotation)
            self.targetEndEffectorMsg.Position.X = pose(1);
            self.targetEndEffectorMsg.Position.Y = pose(2);
-           self.targetEndEffectorMsg.Position.Z = pose(3);
+           self.targetEndEffectorMsg.Position.Z = pose(3) + self.toolOffset;
            
            qua = eul2quat(rotation);
            self.targetEndEffectorMsg.Orientation.W = qua(1);
@@ -119,7 +120,8 @@ classdef DobotMagician < handle
            % Extract the position of the end effector from the received message
            currentEndEffectorPosition = [currentEndEffectorPoseMsg.Pose.Position.X,
                currentEndEffectorPoseMsg.Pose.Position.Y,
-               currentEndEffectorPoseMsg.Pose.Position.Z]';
+               currentEndEffectorPoseMsg.Pose.Position.Z - self.toolOffset]';
+               %currentEndEffectorPoseMsg.Pose.Position.Z]';
            % Extract the orientation of the end effector
            currentEndEffectorQuat = [currentEndEffectorPoseMsg.Pose.Orientation.W,
                currentEndEffectorPoseMsg.Pose.Orientation.X,
@@ -127,8 +129,10 @@ classdef DobotMagician < handle
                currentEndEffectorPoseMsg.Pose.Orientation.Z]';
            % Convert from quaternion to euler
            rotation = quat2eul(currentEndEffectorQuat, "XYZ");
-           tr = rigidtform3d(rotation, currentEndEffectorPosition);
-           %tr=transl(currentEndEffectorPosition)*trotx(rotation(1));
+           %tr = rigidtform3d(rotation, currentEndEffectorPosition)
+           trans=transl(currentEndEffectorPosition)*trotz(rotation(3));
+           tr = rigidtform3d(trans);
+
        end
        
        function SetRobotOnRail(self,status)

@@ -16,10 +16,8 @@ classdef EyeOnHandCalibration
             obj.qs_calib = [];
         end
 
-        function moveToTargetQs(obj, targetQDeg)
-            target_deg = targetQDeg;
-            joint_target = deg2rad(target_deg);
-            obj.dobot.PublishTargetJoint(joint_target);
+        function moveToTargetQs(obj, targetQ)
+            obj.dobot.PublishTargetJoint(targetQ);
         end
 
         function obj = memoriseQs(obj)
@@ -58,13 +56,12 @@ classdef EyeOnHandCalibration
 
 
         function obj = getData(obj, noOfPoses, outputFolder)
-
             for i = 1:1:noOfPoses
                 pause()
                 obj = obj.saveWaypoint(outputFolder);
-                disp("Taken a picture No" + i)
+                disp("Saved a waypoint No" + i)
             end
-            disp("finished taking pictures")
+            disp("Finished getting waypoints")
         end
 
 
@@ -90,6 +87,17 @@ classdef EyeOnHandCalibration
 
         function obj = computeFinalTform(obj)
             obj.cameraToEndEffectorTform = helperEstimateHandEyeTransform(obj.boardToCameraTform, obj.endEffectorToBaseTform, "eye-in-hand");
+           
+            obj.cameraToEndEffectorTform.A(2, 4) = 0; %Camera is alligned on y axis
+            rotation = obj.cameraToEndEffectorTform.A(1:3, 1:3);
+            obj.cameraToEndEffectorTform.R = eye(3) * rotx(pi) * rotz(-pi/2);
+            obj.cameraToEndEffectorTform.Translation(3) = 0.09; 
+            % angles = rotm2eul(rotation, 'XYZ');
+            % disp(rad2deg(angles));
+            %obj.cameraToEndEffectorTform.R = eye(3) * rotx(deg2rad(-167));
+            %obj.cameraToEndEffectorTform.A = obj.cameraToEndEffectorTform.A * trotz(deg2rad(144))
+            %obj.cameraToEndEffectorTform = helperEstimateHandEyeTransform4DOF(obj.boardToCameraTform, obj.endEffectorToBaseTform);
+
         end
 
 
@@ -125,7 +133,12 @@ classdef EyeOnHandCalibration
         end
 
         function moveThroughQs(obj)
-            en
+            for i = 1:1:size(obj.qs_calib, 1)
+                obj.moveToTargetQs(obj.qs_calib(i, :))
+                pause(2)
+            end
+        end
+
 
     end
 end

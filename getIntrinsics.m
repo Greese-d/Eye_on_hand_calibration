@@ -1,13 +1,13 @@
 function intrinsics = getIntrinsics()
 % Load the images
-images = imageDatastore("calib2");
+images = imageDatastore("cameraCalib");
 
 % Detect the checkerboard corners in the images
 [imagePoints, boardSize] = detectCheckerboardPoints(images.Files);
 
 % Generate the world coordinates of the checkerboard corners
 % with the upper-left corner at (0,0)
-squareSize = 12; % in mm
+squareSize = 0.012; % in m
 %boardSize= [5 6];
 worldPoints = generateCheckerboardPoints(boardSize,squareSize);
 

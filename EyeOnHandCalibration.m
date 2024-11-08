@@ -87,6 +87,19 @@ classdef EyeOnHandCalibration
 
         function obj = computeFinalTform(obj)
             obj.cameraToEndEffectorTform = helperEstimateHandEyeTransform(obj.boardToCameraTform, obj.endEffectorToBaseTform, "eye-in-hand");
+           
+            obj.cameraToEndEffectorTform.A(2, 4) = 0; %Camera is alligned on y axis
+            rotation = obj.cameraToEndEffectorTform.A(1:3, 1:3);
+            obj.cameraToEndEffectorTform.R = eye(3) * rotx(pi) * rotz(-pi/2);
+            obj.cameraToEndEffectorTform.Translation(3) = 0.09; 
+
+
+            % angles = rotm2eul(rotation, 'XYZ');
+            % disp(rad2deg(angles));
+            %obj.cameraToEndEffectorTform.R = eye(3) * rotx(deg2rad(-167));
+            %obj.cameraToEndEffectorTform.A = obj.cameraToEndEffectorTform.A * trotz(deg2rad(144))
+            %obj.cameraToEndEffectorTform = helperEstimateHandEyeTransform4DOF(obj.boardToCameraTform, obj.endEffectorToBaseTform);
+
         end
 
 

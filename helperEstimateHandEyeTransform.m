@@ -4,7 +4,6 @@ function cameraToEndEffectorTform = helperEstimateHandEyeTransform(boardToCamera
         endEffectorToBaseTform (:,1) rigidtform3d
         configuration {mustBeMember(configuration, ["eye-in-hand","eye-to-hand"])}
     end
-    disp("Estimating transform from Camera to End-effector")
     numPoses = size(boardToCameraTform,1);
 
     % In the eye-to-hand case, the camera is mounted in the environment and
@@ -90,15 +89,8 @@ function cameraToEndEffectorTform = helperEstimateHandEyeTransform(boardToCamera
         b((i-1)*3+1:i*3,1) = REndEffectorToCamera*TCameraIJ(1:3,4)-TEndEffectorIJ(1:3,4);
     end
 
-
-% Compute translation using least squares.
+    % Compute translation using least squares.
     [TranslationEndEffectorToCamera,~] = lsqr(A,b);
-    
-    % % Correct x and y
-    % temp = TranslationEndEffectorToCamera(1);
-    % TranslationEndEffectorToCamera(1) = -1 * TranslationEndEffectorToCamera(2);
-    % TranslationEndEffectorToCamera(2) = temp;
-
     TEndEffectorToCamera = trvec2tform(TranslationEndEffectorToCamera')*rotm2tform(REndEffectorToCamera);
     cameraToEndEffectorTform = rigidtform3d(TEndEffectorToCamera);
 end
